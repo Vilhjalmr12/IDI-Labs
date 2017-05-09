@@ -1,1 +1,1 @@
-Introduction to Interfaces Design Exercises
+Introduction to Interfaces Design - Qt & OpenGL Exercises
