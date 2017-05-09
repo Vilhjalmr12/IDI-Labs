@@ -1,0 +1,1 @@
+Nomes s'ha modificat l'arxiu MyGLWidget.cpp per afegir un tercer triangle amb el cual es forma el sostre de la casa. En aquest cas, s'especifica que ho fem per triangle strips i per tant del triangle nomes ens cal especificar un dels vertexs (el no comu).

@@ -1,0 +1,3 @@
+Se han modificado los archivos MyGlWidget.cpp y .h (cambios indicados dentro de cada archivo). Tambien se ha modificado el archivo .pro para que sepa donde encontrar los modelos externos
+
+NOTA: Cuidado al cambiar los archivos de directorio porque los paths cambiaran y no encontrara los modelos externos.

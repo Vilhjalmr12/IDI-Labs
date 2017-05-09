@@ -1,0 +1,7 @@
+He cambiado el path del .pro y del .cpp para que busque los models en el directorio ./ para evitar paths absolutos.
+
+He añadido el metodo calcularCapsaMinContenidora para el caso del HomerProves. En este caso, dado que las cordenadas son conocias, estan hardcodeadas en las respectivas variables.
+
+Tambien se ha modificado iniCamera para que los valores sean relativos al tamaño de la esfera contenedora.
+
+La llamada al metodo que calcula la esfera se hace en createBuffers despues de cargar el modelo

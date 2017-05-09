@@ -1,0 +1,1 @@
+Solo se ha modificado el vertex shader. Se ha añadido el metodo que calcula la posicion de los vertices en coordenadas de observador, la normal del vertice y la posicion del foco de luz. A continuacion se efectua la llamada a la funcion que calcula las luces con el metodo de Lambert.

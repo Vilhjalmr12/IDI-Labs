@@ -1,0 +1,3 @@
+Solo se ha modificado el vertex shader. Se ha añadido el metodo que calcula la posicion de los vertices en coordenadas de observador, la normal del vertice y la posicion del foco de luz. A continuacion se efectua la llamada a la funcion que calcula las luces con el metodo de Phong.
+
+La diferencia respecto al caso anterior usando Lambert es que ahora podemos appreciar los brillos especulares en los ojos (unico material brillante).

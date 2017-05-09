@@ -1,0 +1,1 @@
+Solo se ha modificado el metodo projectTransform para sustituir la vista por una ortogonal. Left, Right, Bottom y Top sacados a partir del radio de la escena.

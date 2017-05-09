@@ -1,0 +1,10 @@
+Se ha modificado MYGLWidget.cpp y MYGLWidget.h. Se ha añadido una variable y un metodo 
+
+Tambien se ha modificado el vertex shader para que aplique las transformaciones (multiplicando las matrices de transformacion)
+
+en este caso se ha canviado la posicion del view (observador) para que se aleje de la escena
+
+
+Se ha creado un metodo iniCamera que inicializa los parametros usados por las dos funcionescreadas anteriormente, de esta forma se puede definir en un unico lugar la posicion de la escena y del observador
+
+Si canviamos el vector UP, vemos como el modelo gira hasta que el vector indicado quede totalmente vertical

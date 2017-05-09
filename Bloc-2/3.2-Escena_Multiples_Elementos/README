@@ -1,0 +1,1 @@
+Se ha editado MyGLWidget para cargar dos modelos iguales pero con transformaciones distintas. La esfera se ha calculado en funcion del suelo (medidas conocidas). Faltaba posicionar VRP segun el radio de la esfera.

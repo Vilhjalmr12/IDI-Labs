@@ -1,0 +1,1 @@
+Se ha editado MyGLWidget para cargar un nuevo modelo, centrarlo en el origen y orientar la camara: todo gracias a haber calculado primero la caja y la esfera contenedora del modelo

@@ -1,0 +1,2 @@
+Solo se ha modificado el metodo resizeGL de MyGLWidget.cpp para hacer que se redimensione correctamente la window cuando se redimensiona el viewport
+

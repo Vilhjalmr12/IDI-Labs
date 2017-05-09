@@ -1,0 +1,1 @@
+Se ha modificado el metodo projectTransform para que calcule la proyeccion a partir de los valores left right bottom y top. Dichas variables toman su valor en el metodo resizeGL.

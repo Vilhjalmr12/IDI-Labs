@@ -1,0 +1,1 @@
+Nomes s'ha modificat l'arxiu MyGLWidget.cpp per afegir un segon triangle amb el cual es forma un quadrat. En aquest cas, s'especifica que ho fem per triangle strips i per tant del segon triangle nomes ens cal especificar un dels vertexs (el no comu).

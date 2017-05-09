@@ -1,0 +1,5 @@
+Se ha modificado MYGLWidget.cpp y MYGLWidget.h. Se ha añadido una variable y un metodo 
+
+Tambien se ha modificado el vertex shader para que aplique las transformaciones (multiplicando las matrices de transformacion)
+
+en este caso se ha canviado la posicion de la escena para que se acerque al observador
