@@ -1,0 +1,1 @@
+Se debe modificar la variable vec3 posFocus del vertex shader poniendo ahi las coordenadas que se le quiere dar al foco de luz
