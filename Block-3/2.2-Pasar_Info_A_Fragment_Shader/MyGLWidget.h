@@ -75,5 +75,15 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     int xClick, yClick;
     float angleY;
     bool perspectiva;
+    
+    
+    
+    
+    
+    
+    void calculaPosicionLuz();
+    void calculaColorLuz();
+    float coordxLuz;
+    
 };
 

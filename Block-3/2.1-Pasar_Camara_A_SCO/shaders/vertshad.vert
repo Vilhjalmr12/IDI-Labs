@@ -68,7 +68,7 @@ void main() {
     vec4 vertSCO = view * TG * vec4 (vertex, 1.0);
     mat3 normalMatrix = inverse (transpose (mat3 (view * TG)));
     vec3 normalSCO = normalize (normalMatrix * normal);
-    vec4 focusSCO = vec4 (posFocus, 1.0);
+    vec4 focusSCO = vec4(posFocus, 1.0);
     vec3 L = normalize (focusSCO.xyz - vertSCO.xyz);
     fcolor = Phong(normalSCO, L, vertSCO);
     //fcolor = Lambert (normalSCO, L);

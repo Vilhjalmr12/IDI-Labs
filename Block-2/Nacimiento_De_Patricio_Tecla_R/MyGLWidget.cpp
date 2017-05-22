@@ -21,8 +21,14 @@ void MyGLWidget::initializeGL ()
 
 //________________________ADDED CODE____________________________
 //______________________________________________________________
-    glEnable(GL_DEPTH_TEST);
+  posPat = -0.5;
+  glEnable(GL_DEPTH_TEST);
     carregaShaders();
+
+    coordxLuz = 0.0;
+    calculaPosicionLuz();
+    calculaColorLuz();
+
     createBuffers();
     iniCamera();
 //______________________________________________________________
@@ -35,10 +41,14 @@ void MyGLWidget::paintGL ()
 //______________________________________________________________
     // Esborrem el frame-buffer
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //pintaHomer();
+    // Carreguem la transformació de model
+    /*pintaHomer();*/
+    modelTransformTerra();
     pintaTerra();
+
     pintaPatricio1();
     pintaPatricio2();
+
     glBindVertexArray (0);
 //______________________________________________________________
 //______________________________________________________________
@@ -87,7 +97,8 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
         scale -= 0.05;
         break;
     } case Qt::Key_R: { // Rotar
-        rotacio -= M_PI/24.0; //Radians
+        rotacio += M_PI/24.0; //Radians
+        posPat += 0.003;
         break;
     } case Qt::Key_Z: { // zoom in
         FOV -= (float)M_PI/180;
@@ -317,7 +328,6 @@ void MyGLWidget::carregaTerra(){
 
 void MyGLWidget::pintaTerra(){
     glBindVertexArray (VAOterra);
-    modelTransformTerra();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -372,7 +382,7 @@ void MyGLWidget::modelTransformPatricio1() {
     // Matriu de transformació de model
     //Fem que només s'apliqui al model carregat i no al terra
     glm::mat4 transform (1.0f);
-    glm::vec3 position(1, 0.5, 1); //Centre de la base a (1, 0, 1)
+    glm::vec3 position(1, posPat, 1); //Centre de la base a (1, 0, 1)
     transform = glm::translate(transform, position);
     float escala = 1.0/(PmaxPa.y - PminPa.y); //Alçada 1
     transform = glm::scale(transform, glm::vec3(escala, escala, escala));
@@ -439,3 +449,15 @@ void MyGLWidget::modelTransformPatricio2() {
 }
 //_______________________________________________________________
 //_______________________________________________________________
+
+
+
+void MyGLWidget::calculaPosicionLuz() {
+    positFocus = glm::vec4(coordxLuz, 0, 1, 1);
+    glUniform3fv(posFocusLoc, 1, &positFocus[0]);
+}
+
+void MyGLWidget::calculaColorLuz() {
+    colorFocus = glm::vec3(0.8, 0.8, 0.8);
+    glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
+}

@@ -26,16 +26,14 @@ void MyGLWidget::initializeGL ()
   glClearColor(0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
   glEnable(GL_DEPTH_TEST);
   carregaShaders();
+
+  coordxLuz = 0.0;
+  calculaPosicionLuz();
+  calculaColorLuz();
+
   createBuffers();
   projectTransform ();
   viewTransform ();
-
-    //Added code Ex. 1.5
-    colorFocus = glm::vec3(0.8, 0.8, 0.8);
-    positFocus = glm::vec4(0, 0, 0, 1);
-    //positFocus = View * positFocus; //Para pasar SCO directamente al shader
-    glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
-    glUniform3fv(posFocusLoc, 1, &positFocus[0]);
 }
 
 void MyGLWidget::paintGL () 
@@ -66,6 +64,9 @@ void MyGLWidget::resizeGL (int w, int h)
 {
   glViewport(0, 0, w, h);
 }
+
+//________________________________________BUFFERS_________________________________________
+//________________________________________________________________________________________
 
 void MyGLWidget::createBuffers ()
 {
@@ -163,8 +164,8 @@ void MyGLWidget::createBuffers ()
   //Sustituimos la textura del fondo por una superficie plastica azul
   glm::vec3 amb(0, 0, 0.6);
   glm::vec3 diff(0, 0, 0.6); //Color del material
-  glm::vec3 spec(0.3, 0.3, 0.3);
-  float shin = 100;
+  glm::vec3 spec(1, 1, 0.3); //Color de la mancha especular
+  float shin = 100; //Intensidad de la mancha especular (tamaño y concentracion)
 
   // Fem que aquest material afecti a tots els vèrtexs per igual
   glm::vec3 matambterra[12] = {
@@ -180,7 +181,7 @@ void MyGLWidget::createBuffers ()
 	shin, shin, shin, shin, shin, shin, shin, shin, shin, shin, shin, shin
   };
 
-// Creació del Vertex Array Object del terra
+  // Creació del Vertex Array Object del terra
   glGenVertexArrays(1, &VAO_Terra);
   glBindVertexArray(VAO_Terra);
 
@@ -236,6 +237,9 @@ void MyGLWidget::createBuffers ()
   glBindVertexArray(0);
 }
 
+//____________________________________SHADERS_______________________________________
+//__________________________________________________________________________________
+
 void MyGLWidget::carregaShaders()
 {
   // Creem els shaders per al fragment shader i el vertex shader
@@ -276,12 +280,42 @@ void MyGLWidget::carregaShaders()
   posFocusLoc = glGetUniformLocation(program->programId(), "posFocus");
 }
 
+//________________________________________CAJA DEL MODELO_________________________________
+
+void MyGLWidget::calculaCapsaModel ()
+{
+  // Càlcul capsa contenidora i valors transformacions inicials
+  float minx, miny, minz, maxx, maxy, maxz;
+  minx = maxx = patr.vertices()[0];
+  miny = maxy = patr.vertices()[1];
+  minz = maxz = patr.vertices()[2];
+  for (unsigned int i = 3; i < patr.vertices().size(); i+=3)
+  {
+    if (patr.vertices()[i+0] < minx)
+      minx = patr.vertices()[i+0];
+    if (patr.vertices()[i+0] > maxx)
+      maxx = patr.vertices()[i+0];
+    if (patr.vertices()[i+1] < miny)
+      miny = patr.vertices()[i+1];
+    if (patr.vertices()[i+1] > maxy)
+      maxy = patr.vertices()[i+1];
+    if (patr.vertices()[i+2] < minz)
+      minz = patr.vertices()[i+2];
+    if (patr.vertices()[i+2] > maxz)
+      maxz = patr.vertices()[i+2];
+  }
+  escala = 2.0/(maxy-miny);
+  centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = (miny+maxy)/2.0; centrePatr[2] = (minz+maxz)/2.0;
+}
+
+//__________________________________MATRICES DE TRANSFORMACION_________________________________
+//_____________________________________________________________________________________________
 void MyGLWidget::modelTransformPatricio ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
   TG = glm::scale(TG, glm::vec3(escala, escala, escala));
   TG = glm::translate(TG, -centrePatr);
-  
+
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
@@ -311,32 +345,8 @@ void MyGLWidget::viewTransform ()
   glUniformMatrix4fv (viewLoc, 1, GL_FALSE, &View[0][0]);
 }
 
-void MyGLWidget::calculaCapsaModel ()
-{
-  // Càlcul capsa contenidora i valors transformacions inicials
-  float minx, miny, minz, maxx, maxy, maxz;
-  minx = maxx = patr.vertices()[0];
-  miny = maxy = patr.vertices()[1];
-  minz = maxz = patr.vertices()[2];
-  for (unsigned int i = 3; i < patr.vertices().size(); i+=3)
-  {
-    if (patr.vertices()[i+0] < minx)
-      minx = patr.vertices()[i+0];
-    if (patr.vertices()[i+0] > maxx)
-      maxx = patr.vertices()[i+0];
-    if (patr.vertices()[i+1] < miny)
-      miny = patr.vertices()[i+1];
-    if (patr.vertices()[i+1] > maxy)
-      maxy = patr.vertices()[i+1];
-    if (patr.vertices()[i+2] < minz)
-      minz = patr.vertices()[i+2];
-    if (patr.vertices()[i+2] > maxz)
-      maxz = patr.vertices()[i+2];
-  }
-  escala = 2.0/(maxy-miny);
-  centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = (miny+maxy)/2.0; centrePatr[2] = (minz+maxz)/2.0;
-}
-
+//_________________________________LISTENERS TECLADO Y RATON_________________________________
+//-------------------------------------------------------------------------------------------
 void MyGLWidget::keyPressEvent(QKeyEvent* event) 
 {
   makeCurrent();
@@ -347,13 +357,13 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       break;
     }
     case Qt::Key_K: {
-        positFocus.x -= 0.5;
-        glUniform3fv(posFocusLoc, 1, &positFocus[0]);
+        coordxLuz -= 0.5;
+        calculaPosicionLuz();
         break;
         }
     case Qt::Key_L: {
-        positFocus.x += 0.5;
-        glUniform3fv(posFocusLoc, 1, &positFocus[0]);
+        coordxLuz += 0.5;
+        calculaPosicionLuz();
         break;
         }
     default: event->ignore(); break;
@@ -396,8 +406,20 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
   update ();
 }
 
-//___________________________ADDED CODE________________________________
+//___________________________________ADDED CODE__________________________________
+//_______________________________________________________________________________
 
 void MyGLWidget::actualizaFoco() {
     positFocus = View * positFocus;
 }
+
+void MyGLWidget::calculaPosicionLuz() {
+    positFocus = glm::vec4(coordxLuz, 0, 1, 1);
+    glUniform3fv(posFocusLoc, 1, &positFocus[0]);
+}
+
+void MyGLWidget::calculaColorLuz() {
+    colorFocus = glm::vec3(0.8, 0.8, 0.8);
+    glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
+}
+
