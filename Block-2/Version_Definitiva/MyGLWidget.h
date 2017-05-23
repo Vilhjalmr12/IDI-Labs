@@ -58,7 +58,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     glm::vec3 VRP;
     glm::vec3 UP;
     float FOV, ra, zNear, zFar, raV, FOVini;
-    float rotacio, posPat;
+    float rotacio;
 
     
     void mouseMoveEvent(QMouseEvent *e);

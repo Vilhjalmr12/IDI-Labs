@@ -23,11 +23,13 @@ void MyGLWidget::initializeGL ()
   // Cal inicialitzar l'ús de les funcions d'OpenGL
   initializeOpenGLFunctions();  
 
-  glClearColor(0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
+  glClearColor(0.6, 0.9, 1.0, 1.0); // defineix color de fons (d'esborrat)
   glEnable(GL_DEPTH_TEST);
-  carregaShaders();
 
+  ilumType = false; //True = SCO (luz de camara) False = SCA (luz de escena)
+  carregaShaders();
   coordxLuz = 0.0;
+
   calculaPosicionLuz();
   calculaColorLuz();
 
@@ -164,7 +166,7 @@ void MyGLWidget::createBuffers ()
   //Sustituimos la textura del fondo por una superficie plastica azul
   glm::vec3 amb(0, 0, 0.6);
   glm::vec3 diff(0, 0, 0.6); //Color del material
-  glm::vec3 spec(1, 1, 0.3); //Color de la mancha especular
+  glm::vec3 spec(1, 1, 1); //Color de la mancha especular
   float shin = 100; //Intensidad de la mancha especular (tamaño y concentracion)
 
   // Fem que aquest material afecti a tots els vèrtexs per igual
@@ -360,12 +362,17 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
         coordxLuz -= 0.5;
         calculaPosicionLuz();
         break;
-        }
+    }
     case Qt::Key_L: {
         coordxLuz += 0.5;
         calculaPosicionLuz();
         break;
-        }
+    }
+    case Qt::Key_F: {
+        ilumType = !ilumType;
+        calculaPosicionLuz();
+        break;
+    }
     default: event->ignore(); break;
     }
     update();
@@ -415,11 +422,14 @@ void MyGLWidget::actualizaFoco() {
 
 void MyGLWidget::calculaPosicionLuz() {
     positFocus = glm::vec4(coordxLuz, 0, 1, 1);
+    if (!ilumType) {
+        positFocus = View * positFocus;
+    }
     glUniform3fv(posFocusLoc, 1, &positFocus[0]);
 }
 
 void MyGLWidget::calculaColorLuz() {
-    colorFocus = glm::vec3(0.8, 0.8, 0.8);
+    colorFocus = glm::vec3(0.9, 0.9, 0.9);
     glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
 }
 

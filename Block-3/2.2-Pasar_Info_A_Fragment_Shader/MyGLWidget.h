@@ -79,8 +79,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     
     
     
-    
-    
+    bool ilumType; //Switch entre foco de escena y foco de camara
     void calculaPosicionLuz();
     void calculaColorLuz();
     float coordxLuz;

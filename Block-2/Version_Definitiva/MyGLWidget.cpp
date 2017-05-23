@@ -1,67 +1,47 @@
 #include "MyGLWidget.h"
 #include <iostream>
 
-MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent)
-{
-  setFocusPolicy(Qt::ClickFocus);  // per rebre events de teclat
+//_________________________METODOS DE Qt________________________
+//______________________________________________________________
+MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent) {
+  setFocusPolicy(Qt::ClickFocus);  // per rebre esdeveniments de teclat
   scale = 1.0f;
 }
 
-MyGLWidget::~MyGLWidget ()
-{
+MyGLWidget::~MyGLWidget () {
   if (program != NULL)
     delete program;
 }
 
-void MyGLWidget::initializeGL ()
-{
-  // Cal inicialitzar l'ús de les funcions d'OpenGL
-  initializeOpenGLFunctions();
-  glClearColor(0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
-
-//________________________ADDED CODE____________________________
-//______________________________________________________________
-  posPat = -0.5;
-  glEnable(GL_DEPTH_TEST);
-    carregaShaders();
-
-    coordxLuz = 0.0;
-    calculaPosicionLuz();
-    calculaColorLuz();
-
-    createBuffers();
-    iniCamera();
-//______________________________________________________________
-//______________________________________________________________
+//Punto de inicio
+void MyGLWidget::initializeGL () {
+    // Cal inicialitzar l'ús de les funcions d'OpenGL
+    initializeOpenGLFunctions();
+    glClearColor(0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
+    glEnable(GL_DEPTH_TEST);
+    carregaShaders(); //Carga los shaders de disco e importa algunos de sus atributos
+    createBuffers(); //Carga los modelos externos de disco en variables Model
+    iniCamera(); //Inicializa la posicion y orientacion del observador (camara)
 }
 
-void MyGLWidget::paintGL ()
-{
-//________________________ADDED CODE____________________________
-//______________________________________________________________
-    // Esborrem el frame-buffer
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Carreguem la transformació de model
-    /*pintaHomer();*/
-    modelTransformTerra();
+//Qt llama a este metodo cada que hay que refrescar la ventana
+void MyGLWidget::paintGL () {
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Borramos el frame-buffer
+    //LLamamos a los metodos que pintan todos aquellos elementos que queremos ver en pantalla
+    //pintaHomer();
     pintaTerra();
-
     pintaPatricio1();
     pintaPatricio2();
-
     glBindVertexArray (0);
-//______________________________________________________________
-//______________________________________________________________
 }
 
-void MyGLWidget::resizeGL (int w, int h)
-{
-//________________________ADDED CODE____________________________
-//______________________________________________________________
+//Qt lo llama cada vez que redimensionamos la ventana
+void MyGLWidget::resizeGL (int w, int h) {
+    //Modificamos el ra y el FOV del modelo para que no se deforme al redimensionar la ventana
+    //Version para proyeccion perspectiva
     glViewport(0, 0, w, h); //El vp coge los valores de la ventana Qt
     ra = float(w) / float(h); //Modifica ra del window segun ra del vp
-    if (ra < 1.0) {FOV = 2.0*atan(tan(FOVini/2.0)/ra);}
-    //Recalculamos FOV cuando vp es mas alto que ancho
+    if (ra < 1.0) {FOV = 2.0*atan(tan(FOVini/2.0)/ra);} //Recalculamos FOV cuando vp es mas alto que ancho
     projectTransform(); //Volvemos a calcular la perspectiveMatrix
 
     //Version con la esfera para evitar deformaciones (para proyeccion ortogonal)
@@ -82,101 +62,69 @@ void MyGLWidget::resizeGL (int w, int h)
         bottom = -radiScnTotal/raV;
         projectTransform();
     }*/
-//______________________________________________________________
-//______________________________________________________________
 }
 
-void MyGLWidget::keyPressEvent(QKeyEvent* event)
-{
-  makeCurrent();
-  switch (event->key()) {
-    case Qt::Key_S: { // escalar a més gran
-        scale += 0.05;
-        break;
-    } case Qt::Key_D: { // escalar a més petit
-        scale -= 0.05;
-        break;
-    } case Qt::Key_R: { // Rotar
-        rotacio += M_PI/24.0; //Radians
-        posPat += 0.003;
-        break;
-    } case Qt::Key_Z: { // zoom in
-        FOV -= (float)M_PI/180;
-        projectTransform();
-        break;
-    } case Qt::Key_X: { // zoom out
-        FOV += (float)M_PI/180;
-        projectTransform();
-        break;
-    } default: event->ignore(); break;
-  }
-    update();
-}
-
-void MyGLWidget::createBuffers ()
-{
-//________________________ADDED CODE____________________________
+//____________________CREACION DE LOS BUFFERS___________________
 //______________________________________________________________
-    //Canviem els VBOs de la caseta per l'VBO carregat amb el model HomerProves
+void MyGLWidget::createBuffers () {
+    //Insertamos en sus respectivos VAOs cada uno de los elementos que queremos pintar, tanto los elementos declarados aqui como los modelos cargados de disco
     /*homer.load("models/HomerProves.obj");
     calculaEsferaContenidoraHomerProves();
     carregarModelHomer();*/
     carregaTerra();
-    //Canviem els VBOs de la caseta per l'VBO carregat amb el model Patricio
-    patricio.load("models/Patricio.obj");
+    patricio.load("models/Patricio.obj"); //Cargamos un modelo de disco
     calculaEsferaContenidoraPatricio();
+    //Estas tres variables sirven para calcular los movimientos del raton, les damos un valor inicial por defecto para que no sean indefinidos
     oldXRot = PminPa.x;
     oldYRot = PminPa.y;
     oldYZoom = PminPa.y;
     carregarModelPatricio();
-    calculaEsferaTotal();
+    calculaEsferaTotal(); //Esfera que contiene todo el modelo entero
     glBindVertexArray(0);
-//______________________________________________________________
-//______________________________________________________________
 }
 
-void MyGLWidget::carregaShaders()
-{
-  // Creem els shaders per al fragment shader i el vertex shader
-  QOpenGLShader fs (QOpenGLShader::Fragment, this);
-  QOpenGLShader vs (QOpenGLShader::Vertex, this);
-  // Carreguem el codi dels fitxers i els compilem
-  fs.compileSourceFile("shaders/fragshad.frag");
-  vs.compileSourceFile("shaders/vertshad.vert");
-  // Creem el program
-  program = new QOpenGLShaderProgram(this);
-  // Li afegim els shaders corresponents
-  program->addShader(&fs);
-  program->addShader(&vs);
-  // Linkem el program
-  program->link();
-  // Indiquem que aquest és el program que volem usar
-  program->bind();
+//_______________________CARGAR LOS SHADERS_____________________
+//______________________________________________________________
+void MyGLWidget::carregaShaders() {
+    // Creem els shaders per al fragment shader i el vertex shader
+    QOpenGLShader fs (QOpenGLShader::Fragment, this);
+    QOpenGLShader vs (QOpenGLShader::Vertex, this);
+    // Carreguem el codi dels fitxers i els compilem
+    fs.compileSourceFile("shaders/fragshad.frag");
+    vs.compileSourceFile("shaders/vertshad.vert");
+    // Creem el program
+    program = new QOpenGLShaderProgram(this);
+    // Li afegim els shaders corresponents
+    program->addShader(&fs);
+    program->addShader(&vs);
+    // Linkem el program
+    program->link();
+    // Indiquem que aquest és el program que volem usar
+    program->bind();
 
-  // Obtenim identificador per a l'atribut “vertex” del vertex shader
-  vertexLoc = glGetAttribLocation (program->programId(), "vertex");
-  // Obtenim identificador per a l'atribut “color” del vertex shader
-  colorLoc = glGetAttribLocation (program->programId(), "color");
-  // Uniform locations
-  transLoc = glGetUniformLocation(program->programId(), "TG");
-
-
-//__________________________ADDED CODE____________________________
-//________________________________________________________________
-
+    //Variables que cogemos del shader para darles valor
+    // Obtenim identificador per a l'atribut “vertex” del vertex shader
+    vertexLoc = glGetAttribLocation (program->programId(), "vertex");
+    // Obtenim identificador per a l'atribut “color” del vertex shader
+    colorLoc = glGetAttribLocation (program->programId(), "color");
+    // Uniform locations
+    transLoc = glGetUniformLocation(program->programId(), "TG");
     //Demanem un uniform location per al uniform de la matriu
     projLoc = glGetUniformLocation(program->programId(), "proj");
     viewLoc = glGetUniformLocation(program->programId(), "view");
 }
 
+//______________MATRICES QUE MODIFICAN EL MODELO________________
+//______________________________________________________________
+//Inicializamos todas las variables de camara que usan la view y la projection
 void MyGLWidget::iniCamera() {
-    float dist = radiScnTotal*2.0;
+    float dist = radiScnTotal*2.0; //distancia Observador -> esfera que contiene la escena
     //FOV = (float)M_PI/2.0f;
-    FOV = 2 * asin(radiScnTotal/dist);
-    FOVini = FOV;
+    FOV = 2 * asin(radiScnTotal/dist); //Angulo de obertura (vertical) de la camara
+    FOVini = FOV; //Valor inicial del FOV para poder redimensionar la ventana correctamente
     //VRP = glm::vec3(0,0,0);
-    VRP = PcentreTotal;
-    OBS = VRP + dist*glm::vec3(0.0, 0.0, 1.0);
+    VRP = PcentreTotal; //Punto al que apunta la camara
+    OBS = VRP + dist*glm::vec3(0.0, 0.0, 1.0); //Posicion de la camara
     UP = glm::vec3(0,1,0);
     ra = 1.0F;
     zNear = radiScnTotal;
@@ -210,6 +158,32 @@ void MyGLWidget::viewTransform() {
     view= glm::rotate(view, rotaX, glm::vec3(0,1,0));
     view = glm::rotate(view, rotaY, glm::vec3(1,0,0));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+}
+
+void MyGLWidget::keyPressEvent(QKeyEvent* event)
+{
+  makeCurrent();
+  switch (event->key()) {
+    case Qt::Key_S: { // escalar a més gran
+        scale += 0.05;
+        break;
+    } case Qt::Key_D: { // escalar a més petit
+        scale -= 0.05;
+        break;
+    } case Qt::Key_R: { // Rotar
+        rotacio -= M_PI/24.0; //Radians
+        break;
+    } case Qt::Key_Z: { // zoom in
+        FOV -= (float)M_PI/180;
+        projectTransform();
+        break;
+    } case Qt::Key_X: { // zoom out
+        FOV += (float)M_PI/180;
+        projectTransform();
+        break;
+    } default: event->ignore(); break;
+  }
+    update();
 }
 
 void MyGLWidget::mousePressEvent (QMouseEvent *e) {
@@ -328,6 +302,7 @@ void MyGLWidget::carregaTerra(){
 
 void MyGLWidget::pintaTerra(){
     glBindVertexArray (VAOterra);
+    modelTransformTerra();
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -382,7 +357,7 @@ void MyGLWidget::modelTransformPatricio1() {
     // Matriu de transformació de model
     //Fem que només s'apliqui al model carregat i no al terra
     glm::mat4 transform (1.0f);
-    glm::vec3 position(1, posPat, 1); //Centre de la base a (1, 0, 1)
+    glm::vec3 position(1, 0.5, 1); //Centre de la base a (1, 0, 1)
     transform = glm::translate(transform, position);
     float escala = 1.0/(PmaxPa.y - PminPa.y); //Alçada 1
     transform = glm::scale(transform, glm::vec3(escala, escala, escala));
@@ -449,15 +424,3 @@ void MyGLWidget::modelTransformPatricio2() {
 }
 //_______________________________________________________________
 //_______________________________________________________________
-
-
-
-void MyGLWidget::calculaPosicionLuz() {
-    positFocus = glm::vec4(coordxLuz, 0, 1, 1);
-    glUniform3fv(posFocusLoc, 1, &positFocus[0]);
-}
-
-void MyGLWidget::calculaColorLuz() {
-    colorFocus = glm::vec3(0.8, 0.8, 0.8);
-    glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
-}

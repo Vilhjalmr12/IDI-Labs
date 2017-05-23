@@ -7,12 +7,12 @@ in vec3 matSpec;
 in vec3 matDiff;
 in vec3 matAmb;
 in float matShin;
-in mat4 viewMatrix;
 
 out vec4 FragColor;
 
 uniform vec3 colFocus;
 uniform vec3 posFocus;
+uniform bool ilumType; //True = SCO (luz de camara) False = SCA (luz de escena)
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
 
 
@@ -49,8 +49,7 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO) {
 
 
 void main() {
-        //vec4 auxPosFocus = vec4(posFocus, 1.0); //Para focos en SCO
-        vec4 auxPosFocus = viewMatrix * vec4(posFocus, 1.0); //Para focos en SCA
+        vec4 auxPosFocus = vec4(posFocus, 1.0);
         vec3 L = normalize(auxPosFocus.xyz - vertSCO.xyz);
         vec3 color = Phong(normalSCO, L, vertSCO);
         FragColor = vec4(color, 1);

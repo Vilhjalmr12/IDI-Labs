@@ -22,7 +22,6 @@ out vec3 matAmb;
 out vec3 matDiff;
 out vec3 matSpec;
 out float matShin;
-out mat4 viewMatrix;
 out vec3 fcolor;
 out vec4 vertSCO;
 out vec3 normalSCO;
@@ -34,7 +33,6 @@ void main() {
     matDiff = matdiff;
     matSpec = matspec;
     matShin = matshin;
-    viewMatrix = view;
     fcolor = colFocus;
     
     vertSCO = (view * TG * vec4(vertex, 1.0));
