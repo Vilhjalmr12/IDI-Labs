@@ -100,6 +100,13 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     float oldXRot, oldYRot, rotaX, rotaY, oldYZoom;
     float radiScnTotal;
     float left, right, bottom, top;
+    
+    public slots:
+        void changeZoom(int);
+  
+    signals:
+        void updateZoom(int);
+    
     //______________________________________________________________
     //______________________________________________________________
 };

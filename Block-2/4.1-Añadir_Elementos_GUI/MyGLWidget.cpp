@@ -122,6 +122,7 @@ void MyGLWidget::iniCamera() {
     //FOV = (float)M_PI/2.0f;
     FOV = 2 * asin(radiScnTotal/dist); //Angulo de obertura (vertical) de la camara
     FOVini = FOV; //Valor inicial del FOV para poder redimensionar la ventana correctamente
+    emit updateZoom(180.0 - (FOV * (180/M_PI))); //Para que el slider del zoom no empiece en 0
     //VRP = glm::vec3(0,0,0);
     VRP = PcentreTotal; //Punto al que apunta la camara
     OBS = VRP + dist*glm::vec3(0.0, 0.0, 1.0); //Posicion de la camara
@@ -215,13 +216,15 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e) {
         oldXRot = e->x();
         oldYRot = e->y();
     } else if (isDoing == ZOOM) {
-        if (e->y() > oldYZoom) {
+        //Ya que esta ahora la opcion de hacer zoom con el slider quito la opcion del raton
+        /*if (e->y() > oldYZoom) {
             FOV += (float)M_PI/180;
         } else if (e->y() < oldYZoom){
             FOV -= (float)M_PI/180;
         }
         oldYZoom = e->y();
-        projectTransform();
+        emit updateZoom(180.0 - (FOV * (180/M_PI)));
+        projectTransform();*/
     }
     update();
 }
@@ -422,5 +425,15 @@ void MyGLWidget::modelTransformPatricio2() {
     //Traslladat fins a l'origen de coordenades
     glUniformMatrix4fv(transLoc, 1, GL_FALSE, &transform[0][0]);
 }
+
+//Public Slots
+void MyGLWidget::changeZoom(int newZoom) {
+  makeCurrent();
+  FOV = (float)(180 - newZoom) * M_PI/180;
+  projectTransform();
+  update();
+}
+
 //_______________________________________________________________
 //_______________________________________________________________
+
