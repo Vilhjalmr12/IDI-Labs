@@ -465,7 +465,7 @@ void MyGLWidget::calculaPosicionLuz() {
 }
 
 void MyGLWidget::calculaColorLuz() {
-    colorFocus = glm::vec3(0.9, 0.9, 0.9);
+    colorFocus = glm::vec3(1.0, 1.0, 0.2);
     glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
 }
 

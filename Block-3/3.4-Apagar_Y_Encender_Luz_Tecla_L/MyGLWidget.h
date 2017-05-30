@@ -83,7 +83,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void calculaPosicionLuz();
     void calculaColorLuz();
     float coordxLuz, coordzLuz;
-        
+    bool lightOn;    
     float posX, posZ;
 };
 

@@ -2,8 +2,7 @@
 
 #include <iostream>
 
-MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent)
-{
+MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent) {
   setFocusPolicy(Qt::ClickFocus);  // per rebre events de teclat
   xClick = yClick = 0;
   angleY = 0.0;
@@ -12,24 +11,25 @@ MyGLWidget::MyGLWidget (QWidget* parent) : QOpenGLWidget(parent)
   radiEsc = sqrt(3);
 }
 
-MyGLWidget::~MyGLWidget ()
-{
+MyGLWidget::~MyGLWidget () {
   if (program != NULL)
     delete program;
 }
 
-void MyGLWidget::initializeGL ()
-{
+void MyGLWidget::initializeGL () {
   // Cal inicialitzar l'ús de les funcions d'OpenGL
   initializeOpenGLFunctions();  
 
-  glClearColor(0.6, 0.9, 1.0, 1.0); // defineix color de fons (d'esborrat)
+  //Color de fondo del widget
+  glClearColor(0.6, 0.9, 1.0, 1.0); //Azul pastel
+  glClearColor(0.12, 0.12, 0.12, 1.0);
   glEnable(GL_DEPTH_TEST);
 
   ilumType = false; //True = SCO (luz de camara) False = SCA (luz de escena)
   carregaShaders();
   coordxLuz = 0.0;
   coordzLuz = 0.0;
+  lightOn = true;
   posX = 0; posZ = 0;
   calculaColorLuz();
   createBuffers();
@@ -38,8 +38,7 @@ void MyGLWidget::initializeGL ()
   calculaPosicionLuz();
 }
 
-void MyGLWidget::paintGL () 
-{
+void MyGLWidget::paintGL ()  {
   // Esborrem el frame-buffer i el depth-buffer
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -62,16 +61,14 @@ void MyGLWidget::paintGL ()
   glBindVertexArray(0);
 }
 
-void MyGLWidget::resizeGL (int w, int h) 
-{
+void MyGLWidget::resizeGL (int w, int h)  {
   glViewport(0, 0, w, h);
 }
 
 //________________________________________BUFFERS_________________________________________
 //________________________________________________________________________________________
 
-void MyGLWidget::createBuffers ()
-{
+void MyGLWidget::createBuffers () {
   // Carreguem el model de l'OBJ - Atenció! Abans de crear els buffers!
   patr.load("models/Patricio.obj");
 
@@ -242,8 +239,7 @@ void MyGLWidget::createBuffers ()
 //____________________________________SHADERS_______________________________________
 //__________________________________________________________________________________
 
-void MyGLWidget::carregaShaders()
-{
+void MyGLWidget::carregaShaders() {
   // Creem els shaders per al fragment shader i el vertex shader
   QOpenGLShader fs (QOpenGLShader::Fragment, this);
   QOpenGLShader vs (QOpenGLShader::Vertex, this);
@@ -284,15 +280,13 @@ void MyGLWidget::carregaShaders()
 
 //________________________________________CAJA DEL MODELO_________________________________
 
-void MyGLWidget::calculaCapsaModel ()
-{
+void MyGLWidget::calculaCapsaModel () {
   // Càlcul capsa contenidora i valors transformacions inicials
   float minx, miny, minz, maxx, maxy, maxz;
   minx = maxx = patr.vertices()[0];
   miny = maxy = patr.vertices()[1];
   minz = maxz = patr.vertices()[2];
-  for (unsigned int i = 3; i < patr.vertices().size(); i+=3)
-  {
+  for (unsigned int i = 3; i < patr.vertices().size(); i+=3) {
     if (patr.vertices()[i+0] < minx)
       minx = patr.vertices()[i+0];
     if (patr.vertices()[i+0] > maxx)
@@ -312,8 +306,7 @@ void MyGLWidget::calculaCapsaModel ()
 
 //__________________________________MATRICES DE TRANSFORMACION_________________________________
 //_____________________________________________________________________________________________
-void MyGLWidget::modelTransformPatricio ()
-{
+void MyGLWidget::modelTransformPatricio () {
   glm::mat4 TG(1.f);  // Matriu de transformació
   TG = glm::translate(TG, glm::vec3(posX, -0.85, posZ));
   TG = glm::scale(TG, glm::vec3(escala, escala, escala));
@@ -322,14 +315,12 @@ void MyGLWidget::modelTransformPatricio ()
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
-void MyGLWidget::modelTransformTerra ()
-{
+void MyGLWidget::modelTransformTerra () {
   glm::mat4 TG(1.f);  // Matriu de transformació
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
-void MyGLWidget::projectTransform ()
-{
+void MyGLWidget::projectTransform () {
   glm::mat4 Proj;  // Matriu de projecció
   if (perspectiva)
     Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
@@ -339,8 +330,7 @@ void MyGLWidget::projectTransform ()
   glUniformMatrix4fv (projLoc, 1, GL_FALSE, &Proj[0][0]);
 }
 
-void MyGLWidget::viewTransform ()
-{
+void MyGLWidget::viewTransform () {
   //glm::mat4 View;  // Matriu de posició i orientació
   View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
   View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
@@ -350,8 +340,7 @@ void MyGLWidget::viewTransform ()
 
 //_________________________________LISTENERS TECLADO Y RATON_________________________________
 //-------------------------------------------------------------------------------------------
-void MyGLWidget::keyPressEvent(QKeyEvent* event) 
-{
+void MyGLWidget::keyPressEvent(QKeyEvent* event)  {
   makeCurrent();
   switch (event->key()) {
     case Qt::Key_O: { // canvia òptica entre perspectiva i axonomètrica
@@ -359,14 +348,9 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       projectTransform ();
       break;
     }
-    case Qt::Key_K: {
-        /*coordxLuz -= 0.5;
-        calculaPosicionLuz();*/
-        break;
-    }
     case Qt::Key_L: {
-        /*coordxLuz += 0.5;
-        calculaPosicionLuz();*/
+        lightOn = !lightOn;
+        calculaColorLuz();
         break;
     }
     case Qt::Key_F: {
@@ -415,29 +399,24 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
     update();
 }
 
-void MyGLWidget::mousePressEvent (QMouseEvent *e)
-{
+void MyGLWidget::mousePressEvent (QMouseEvent *e) {
   xClick = e->x();
   yClick = e->y();
 
   if (e->button() & Qt::LeftButton &&
-      ! (e->modifiers() & (Qt::ShiftModifier|Qt::AltModifier|Qt::ControlModifier)))
-  {
-    DoingInteractive = ROTATE;
+      ! (e->modifiers() & (Qt::ShiftModifier|Qt::AltModifier|Qt::ControlModifier))) {
+        DoingInteractive = ROTATE;
   }
 }
 
-void MyGLWidget::mouseReleaseEvent( QMouseEvent *)
-{
+void MyGLWidget::mouseReleaseEvent( QMouseEvent *) {
   DoingInteractive = NONE;
 }
 
-void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
-{
+void MyGLWidget::mouseMoveEvent(QMouseEvent *e) {
   makeCurrent();
   // Aqui cal que es calculi i s'apliqui la rotacio o el zoom com s'escaigui...
-  if (DoingInteractive == ROTATE)
-  {
+  if (DoingInteractive == ROTATE) {
     // Fem la rotació
     angleY += (e->x() - xClick) * M_PI / 180.0;
     viewTransform ();
@@ -465,7 +444,12 @@ void MyGLWidget::calculaPosicionLuz() {
 }
 
 void MyGLWidget::calculaColorLuz() {
-    colorFocus = glm::vec3(0.9, 0.9, 0.9);
+    if (lightOn) {
+        colorFocus = glm::vec3(1.0, 1.0, 1.0); //Blanca
+        colorFocus = glm::vec3(1.0, 1.0, 0.2); //Amarilla
+    } else {
+        colorFocus = glm::vec3(0.0, 0.0, 0.0); //Negra
+    }
     glUniform3fv(colFocusLoc, 1, &colorFocus[0]);
 }
 
