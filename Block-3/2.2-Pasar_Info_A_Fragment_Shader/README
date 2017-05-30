@@ -1,1 +1,1 @@
-Se han modificado las variables colFocus y posFocus del vertex shader para convertirlas en uniforms. Ha continuacion se ha modificado el codigo de carregaShaders e initializeGL de MyGLWidget para inicializar las variables del foco de luz.
+Cambios multiples en myGLWidget y en ambos shaders

@@ -29,7 +29,7 @@ void MyGLWidget::initializeGL ()
   ilumType = false; //True = SCO (luz de camara) False = SCA (luz de escena)
   carregaShaders();
   coordxLuz = 0.0;
-
+  posX = 0; posZ = 0;
   calculaColorLuz();
   createBuffers();
   projectTransform ();
@@ -305,7 +305,7 @@ void MyGLWidget::calculaCapsaModel ()
     if (patr.vertices()[i+2] > maxz)
       maxz = patr.vertices()[i+2];
   }
-  escala = 2.0/(maxy-miny);
+  escala = 0.3/(maxy-miny);
   centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = (miny+maxy)/2.0; centrePatr[2] = (minz+maxz)/2.0;
 }
 
@@ -314,6 +314,7 @@ void MyGLWidget::calculaCapsaModel ()
 void MyGLWidget::modelTransformPatricio ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
+  TG = glm::translate(TG, glm::vec3(posX, -0.85, posZ));
   TG = glm::scale(TG, glm::vec3(escala, escala, escala));
   TG = glm::translate(TG, -centrePatr);
 
@@ -372,6 +373,26 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
         calculaPosicionLuz();
         break;
     }
+    case Qt::Key_Up: {
+        if (posZ > -0.90) posZ -= 0.03;
+        modelTransformPatricio();
+        break;
+    }
+    case Qt::Key_Down: {
+        if (posZ < 0.90) posZ += 0.03;
+        modelTransformPatricio();
+        break;
+    }
+    case Qt::Key_Left: {
+        if (posX > -0.90) posX -= 0.03;
+        modelTransformPatricio();
+        break;
+    }
+    case Qt::Key_Right: {
+        if (posX < 0.90) posX += 0.03;
+        modelTransformPatricio();
+        break;
+    }
     default: event->ignore(); break;
     }
     update();
@@ -415,18 +436,12 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
 //___________________________________ADDED CODE__________________________________
 //_______________________________________________________________________________
 
-void MyGLWidget::actualizaFoco() {
-    positFocusSdr = View * positFocus;
-    glUniform3fv(posFocusLoc, 1, &positFocusSdr[0]);
-}
-
 void MyGLWidget::calculaPosicionLuz() {
     if (!ilumType) { //Luz de escena
-        coordxLuz = 1;
-        positFocus = glm::vec4(1, 1, 1, 1);
+        positFocus = glm::vec4(coordxLuz, 1, 1, 1);
         positFocusSdr = View * positFocus;
     } else { //Luz de camara
-        positFocus = glm::vec4(0, 0, 0, 1);//glm::vec4(coordxLuz, 0, 1, 1);
+        positFocus = glm::vec4(0, 0, 0, 1);
         positFocusSdr = positFocus;
     }
     glUniform3fv(posFocusLoc, 1, &positFocusSdr[0]);

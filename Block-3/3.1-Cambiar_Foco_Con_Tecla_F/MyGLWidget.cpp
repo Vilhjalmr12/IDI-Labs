@@ -422,11 +422,10 @@ void MyGLWidget::actualizaFoco() {
 
 void MyGLWidget::calculaPosicionLuz() {
     if (!ilumType) { //Luz de escena
-        coordxLuz = 1;
-        positFocus = glm::vec4(1, 1, 1, 1);
+        positFocus = glm::vec4(coordxLuz, 1, 1, 1);
         positFocusSdr = View * positFocus;
     } else { //Luz de camara
-        positFocus = glm::vec4(0, 0, 0, 1);//glm::vec4(coordxLuz, 0, 1, 1);
+        positFocus = glm::vec4(0, 0, 0, 1);
         positFocusSdr = positFocus;
     }
     glUniform3fv(posFocusLoc, 1, &positFocusSdr[0]);

@@ -1,0 +1,1 @@
+La tecla F activa un bool en MyGLWidget que determina si el foco se multiplica por la view o no. Tanto esta accion como la rotacion con raton llaman a este nuevo metodo para actualizarse
