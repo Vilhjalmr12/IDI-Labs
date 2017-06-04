@@ -29,6 +29,12 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     virtual void resizeGL (int width, int height);
     // keyPressEvent - Es cridat quan es prem una tecla
     virtual void keyPressEvent (QKeyEvent *event);
+    
+    public slots:
+        virtual void changeZoom(int);
+  
+    signals:
+        virtual void updateZoom(int);
 
   private:
     void createBuffers ();
@@ -101,11 +107,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     float radiScnTotal;
     float left, right, bottom, top;
     
-    public slots:
-        void changeZoom(int);
-  
-    signals:
-        void updateZoom(int);
+    
     
     //______________________________________________________________
     //______________________________________________________________
